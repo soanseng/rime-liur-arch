@@ -127,5 +127,3 @@ liu_english_filter = require("liu_english_filter")
 
 -- 英文大小寫轉換（word] → Word，word]] → WORD）
 liu_english_case_filter = require("liu_english_case_filter")
--- 反斜線處理（緩衝區為空時直接上屏）
-liu_backslash_processor = require("liu_backslash_processor")

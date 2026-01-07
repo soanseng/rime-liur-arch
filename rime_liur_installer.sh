@@ -236,7 +236,7 @@ else
 fi
 
 # 清理 configs 資料夾
-rm -rf "$RIME_FOLDER/configs"
+rm -rf "$RIME_FOLDER/configs" 2>/dev/null || true
 
 echo
 echo "[ Step 3: 安裝字體 ]"
@@ -262,8 +262,14 @@ echo  # 換行
 echo
 echo "[ Step 4: 部署 RIME ]"
 
-"$SQUIRREL_APP" --reload
-echo -e "${GREEN}已觸發鼠鬚管重新部署，請等待 10 至 20 秒${NC}"
+if [ -f "$SQUIRREL_APP" ]; then
+    # 使用 --deploy 觸發部署（隱藏輸出訊息）
+    "$SQUIRREL_APP" --deploy >/dev/null 2>&1 &
+    sleep 1
+    echo -e "${GREEN}已觸發鼠鬚管重新部署，請等待 10 至 20 秒${NC}"
+else
+    echo -e "${YELLOW}無法自動部署，請手動重新部署鼠鬚管${NC}"
+fi
 
 echo
 echo "======================================"
