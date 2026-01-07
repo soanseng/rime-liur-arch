@@ -112,9 +112,6 @@ done
 echo  # 換行
 
 echo
-echo "[ Step 1: 取得檔案清單 ]"
-
-# 從 GitHub API 取得檔案清單（使用 Python 解析 JSON）
 echo "正在從 GitHub 取得檔案清單..."
 ALL_FILES=$(curl -fsSL "$GITHUB_API" 2>/dev/null | python3 -c "
 import sys, json
@@ -140,6 +137,7 @@ ROOT_FILES=()
 LUA_FILES=()
 LUA_LUNAR_FILES=()
 OPENCC_FILES=()
+CONFIGS_FILES=()
 FONT_FILES=()
 
 while IFS= read -r file; do
@@ -157,6 +155,8 @@ while IFS= read -r file; do
         LUA_FILES+=("$file")
     elif [[ "$file" == opencc/* ]]; then
         OPENCC_FILES+=("$file")
+    elif [[ "$file" == configs/* ]]; then
+        CONFIGS_FILES+=("$file")
     elif [[ "$file" == fonts/* ]]; then
         FONT_FILES+=("$file")
     elif [[ "$file" != */* ]]; then
@@ -165,17 +165,18 @@ while IFS= read -r file; do
 done <<< "$ALL_FILES"
 
 # 計算總檔案數
-TOTAL_FILES=$((${#ROOT_FILES[@]} + ${#LUA_FILES[@]} + ${#LUA_LUNAR_FILES[@]} + ${#OPENCC_FILES[@]}))
+TOTAL_FILES=$((${#ROOT_FILES[@]} + ${#LUA_FILES[@]} + ${#LUA_LUNAR_FILES[@]} + ${#OPENCC_FILES[@]} + ${#CONFIGS_FILES[@]}))
 echo "找到 $TOTAL_FILES 個方案檔案、${#FONT_FILES[@]} 個字體"
 
 echo
-echo "[ Step 2: 下載蝦米輸入方案檔案 ]"
+echo "[ Step 1: 下載蝦米輸入方案檔案 ]"
 
 # 建立資料夾
 mkdir -p "$RIME_FOLDER"
 mkdir -p "$RIME_FOLDER/lua"
 mkdir -p "$RIME_FOLDER/lua/lunar_calendar"
 mkdir -p "$RIME_FOLDER/opencc"
+mkdir -p "$RIME_FOLDER/configs"
 
 CURRENT=0
 
@@ -210,10 +211,18 @@ for file in "${OPENCC_FILES[@]}"; do
     curl -fsSL "${GITHUB_RAW}/${file}" -o "$RIME_FOLDER/opencc/$filename"
 done
 
+# 下載 Configs 檔案
+for file in "${CONFIGS_FILES[@]}"; do
+    ((CURRENT++))
+    filename=$(basename "$file")
+    show_progress $CURRENT $TOTAL_FILES "$filename"
+    curl -fsSL "${GITHUB_RAW}/${file}" -o "$RIME_FOLDER/configs/$filename"
+done
+
 echo  # 換行
 
 echo
-echo "[ Step 3: 配置輸入方案版本 ]"
+echo "[ Step 2: 配置輸入方案版本 ]"
 
 # 根據選擇配置對應版本
 if [ "$SCHEMA_VERSION" = "mixed" ]; then
@@ -227,7 +236,7 @@ else
 fi
 
 echo
-echo "[ Step 4: 安裝字體 ]"
+echo "[ Step 3: 安裝字體 ]"
 
 mkdir -p "$FONT_FOLDER"
 
@@ -248,7 +257,7 @@ done
 echo  # 換行
 
 echo
-echo "[ Step 5: 部署 RIME ]"
+echo "[ Step 4: 部署 RIME ]"
 
 "$SQUIRREL_APP" --reload
 echo -e "${GREEN}已觸發鼠鬚管重新部署，請等待 10 至 20 秒${NC}"

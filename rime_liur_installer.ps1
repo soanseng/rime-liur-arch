@@ -96,9 +96,6 @@ for ($i = 3; $i -ge 1; $i--) {
 Write-Host ""  # 換行
 
 Write-Host ""
-Write-Host "[ Step 1: 取得檔案清單 ]" -ForegroundColor Green
-
-# 從 GitHub API 取得檔案清單
 Write-Host "正在從 GitHub 取得檔案清單..."
 try {
     $response = Invoke-RestMethod -Uri $GITHUB_API -Method Get
@@ -133,6 +130,7 @@ $ROOT_FILES = @()
 $LUA_FILES = @()
 $LUA_LUNAR_FILES = @()
 $OPENCC_FILES = @()
+$CONFIGS_FILES = @()
 $FONT_FILES = @()
 $FONT_FILES_WIN = @()
 
@@ -152,6 +150,8 @@ foreach ($item in $response.tree) {
         $LUA_FILES += $filePath
     } elseif ($filePath -match "^opencc/") {
         $OPENCC_FILES += $filePath
+    } elseif ($filePath -match "^configs/") {
+        $CONFIGS_FILES += $filePath
     } elseif ($filePath -match "^fonts/Windows Only/") {
         $FONT_FILES_WIN += $filePath
     } elseif ($filePath -match "^fonts/") {
@@ -163,18 +163,19 @@ foreach ($item in $response.tree) {
 }
 
 # 計算總檔案數
-$TOTAL_FILES = $ROOT_FILES.Count + $LUA_FILES.Count + $LUA_LUNAR_FILES.Count + $OPENCC_FILES.Count
+$TOTAL_FILES = $ROOT_FILES.Count + $LUA_FILES.Count + $LUA_LUNAR_FILES.Count + $OPENCC_FILES.Count + $CONFIGS_FILES.Count
 $TOTAL_FONTS = $FONT_FILES.Count + $FONT_FILES_WIN.Count
 Write-Host "找到 $TOTAL_FILES 個方案檔案、$TOTAL_FONTS 個字體"
 
 Write-Host ""
-Write-Host "[ Step 2: 下載蝦米輸入方案檔案 ]" -ForegroundColor Green
+Write-Host "[ Step 1: 下載蝦米輸入方案檔案 ]" -ForegroundColor Green
 
 # 建立資料夾
 New-Item -ItemType Directory -Force -Path $RIME_FOLDER | Out-Null
 New-Item -ItemType Directory -Force -Path "$RIME_FOLDER\lua" | Out-Null
 New-Item -ItemType Directory -Force -Path "$RIME_FOLDER\lua\lunar_calendar" | Out-Null
 New-Item -ItemType Directory -Force -Path "$RIME_FOLDER\opencc" | Out-Null
+New-Item -ItemType Directory -Force -Path "$RIME_FOLDER\configs" | Out-Null
 
 $current = 0
 
@@ -209,10 +210,18 @@ foreach ($file in $OPENCC_FILES) {
     Invoke-WebRequest -Uri "$GITHUB_RAW/$file" -OutFile "$RIME_FOLDER\opencc\$filename" | Out-Null
 }
 
+# 下載 Configs 檔案
+foreach ($file in $CONFIGS_FILES) {
+    $current++
+    $filename = Split-Path $file -Leaf
+    Show-Progress -Current $current -Total $TOTAL_FILES -FileName $filename
+    Invoke-WebRequest -Uri "$GITHUB_RAW/$file" -OutFile "$RIME_FOLDER\configs\$filename" | Out-Null
+}
+
 Write-Host ""  # 換行
 
 Write-Host ""
-Write-Host "[ Step 3: 配置輸入方案版本 ]" -ForegroundColor Green
+Write-Host "[ Step 2: 配置輸入方案版本 ]" -ForegroundColor Green
 
 # 根據選擇配置對應版本
 if ($SCHEMA_VERSION -eq "mixed") {
@@ -226,7 +235,7 @@ if ($SCHEMA_VERSION -eq "mixed") {
 }
 
 Write-Host ""
-Write-Host "[ Step 4: 安裝字體 ]" -ForegroundColor Green
+Write-Host "[ Step 3: 安裝字體 ]" -ForegroundColor Green
 
 New-Item -ItemType Directory -Force -Path $FONT_FOLDER | Out-Null
 
@@ -260,7 +269,7 @@ foreach ($file in $FONT_FILES_WIN) {
 Write-Host ""  # 換行
 
 Write-Host ""
-Write-Host "[ Step 5: 完成 ]" -ForegroundColor Green
+Write-Host "[ Step 4: 部署 RIME ]" -ForegroundColor Green
 Write-Host ""
 Write-Host "請手動重新部署小狼毫（右鍵點擊系統匣圖示 → 重新部署）" -ForegroundColor Yellow
 Write-Host ""
