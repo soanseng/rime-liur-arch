@@ -352,20 +352,41 @@
     
     // 把亮暗色按鈕插入到 sidebar 標題旁邊
     function insertThemeToggle() {
-      const appName = document.querySelector('.app-name-link');
+      // 等待 Docsify 完全載入
+      const appName = document.querySelector('.app-name-link') || document.querySelector('.app-name');
       if (appName && !document.querySelector('.theme-toggle')) {
         const btn = document.createElement('button');
         btn.className = 'theme-toggle';
         btn.title = '切換亮暗色主題';
         btn.onclick = toggleTheme;
         btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-        appName.parentNode.insertBefore(btn, appName.nextSibling);
+        
+        // 嘗試不同的插入方式
+        if (appName.parentNode) {
+          appName.parentNode.insertBefore(btn, appName.nextSibling);
+        } else {
+          appName.appendChild(btn);
+        }
+      }
+    }
+    
+    // 多次嘗試插入按鈕，確保 Docsify 完全載入
+    function tryInsertThemeToggle() {
+      insertThemeToggle();
+      // 如果還沒插入成功，再試一次
+      if (!document.querySelector('.theme-toggle')) {
+        setTimeout(insertThemeToggle, 500);
       }
     }
     
     // 頁面載入後插入按鈕
     window.addEventListener('load', function() {
-      setTimeout(insertThemeToggle, 200);
+      setTimeout(tryInsertThemeToggle, 200);
+    });
+    
+    // Docsify 載入完成後也嘗試插入
+    window.addEventListener('DOMContentLoaded', function() {
+      setTimeout(tryInsertThemeToggle, 300);
     });
     
     // 動態修正深色模式元素背景

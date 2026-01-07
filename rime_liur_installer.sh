@@ -86,7 +86,7 @@ echo "   - 適合純中文寫作"
 echo
 
 while true; do
-    read -p "請輸入選項 (1 或 2): " choice
+    read -p "請輸入選項 (1 或 2): " choice < /dev/tty
     case $choice in
         1)
             SCHEMA_VERSION="mixed"
