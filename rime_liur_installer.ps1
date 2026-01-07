@@ -234,6 +234,9 @@ if ($SCHEMA_VERSION -eq "mixed") {
     Write-Host "已配置為基礎版（中打不含英文詞庫）" -ForegroundColor Green
 }
 
+# 清理 configs 資料夾
+Remove-Item -Recurse -Force "$RIME_FOLDER\configs" -ErrorAction SilentlyContinue
+
 Write-Host ""
 Write-Host "[ Step 3: 安裝字體 ]" -ForegroundColor Green
 

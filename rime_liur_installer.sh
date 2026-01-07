@@ -235,6 +235,9 @@ else
     echo -e "${GREEN}已配置為基礎版（中打不含英文詞庫）${NC}"
 fi
 
+# 清理 configs 資料夾
+rm -rf "$RIME_FOLDER/configs"
+
 echo
 echo "[ Step 3: 安裝字體 ]"
 
