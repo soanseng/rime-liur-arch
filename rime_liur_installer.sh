@@ -55,9 +55,10 @@ echo "  RIME 蝦米輸入方案 自動安裝工具"
 echo "======================================"
 echo
 echo "本工具將執行以下作業："
-echo "1. 下載蝦米輸入方案檔案到 Rime 資料夾"
-echo "2. 安裝所需字體"
-echo "3. 部署 RIME"
+echo "1. 選擇輸入方案版本"
+echo "2. 下載蝦米輸入方案檔案到 Rime 資料夾"
+echo "3. 安裝所需字體"
+echo "4. 部署 RIME"
 echo
 
 # 檢查鼠鬚管
@@ -69,7 +70,42 @@ fi
 
 echo -e "${YELLOW}※ 若有自訂設定尚未備份，請按 Ctrl+C 終止${NC}"
 echo
-for i in {5..1}; do
+
+# 版本選擇
+echo -e "${YELLOW}請選擇輸入方案版本：${NC}"
+echo
+echo "1. 完整版（中打含英文詞庫版）（推薦）"
+echo "   - 完整功能，中文輸入搭配英文詞庫輔助"
+echo "   - 英文詞庫支援，大小寫轉換"
+echo "   - 適合日常使用、程式開發"
+echo
+echo "2. 基礎版（中打不含英文詞庫）"
+echo "   - 專注中文輸入，不含英文詞庫"
+echo "   - 減少英文候選干擾"
+echo "   - 適合純中文寫作"
+echo
+
+while true; do
+    read -p "請輸入選項 (1 或 2): " choice
+    case $choice in
+        1)
+            SCHEMA_VERSION="mixed"
+            echo -e "${GREEN}已選擇：完整版（中打含英文詞庫版）${NC}"
+            break
+            ;;
+        2)
+            SCHEMA_VERSION="chinese-only"
+            echo -e "${GREEN}已選擇：基礎版（中打不含英文詞庫）${NC}"
+            break
+            ;;
+        *)
+            echo -e "${RED}請輸入 1 或 2${NC}"
+            ;;
+    esac
+done
+
+echo
+for i in {3..1}; do
     printf "\r將在 %d 秒後開始..." "$i"
     sleep 1
 done
@@ -177,7 +213,21 @@ done
 echo  # 換行
 
 echo
-echo "[ Step 3: 安裝字體 ]"
+echo "[ Step 3: 配置輸入方案版本 ]"
+
+# 根據選擇配置對應版本
+if [ "$SCHEMA_VERSION" = "mixed" ]; then
+    echo "正在配置完整版（中打含英文詞庫版）..."
+    cp "$RIME_FOLDER/configs/liur.schema.yaml" "$RIME_FOLDER/liur.schema.yaml"
+    echo -e "${GREEN}已配置為完整版（中打含英文詞庫版）${NC}"
+else
+    echo "正在配置基礎版（中打不含英文詞庫）..."
+    cp "$RIME_FOLDER/configs/liur.chinese-only.schema.yaml" "$RIME_FOLDER/liur.schema.yaml"
+    echo -e "${GREEN}已配置為基礎版（中打不含英文詞庫）${NC}"
+fi
+
+echo
+echo "[ Step 4: 安裝字體 ]"
 
 mkdir -p "$FONT_FOLDER"
 
@@ -198,7 +248,7 @@ done
 echo  # 換行
 
 echo
-echo "[ Step 4: 部署 RIME ]"
+echo "[ Step 5: 部署 RIME ]"
 
 "$SQUIRREL_APP" --reload
 echo -e "${GREEN}已觸發鼠鬚管重新部署，請等待 10 至 20 秒${NC}"

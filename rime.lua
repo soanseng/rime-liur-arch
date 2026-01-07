@@ -107,16 +107,25 @@ liu_fancy_filter = require("liu_fancy_filter")
 -- VRSF 選字提示
 liu_vrsf_hint = require("liu_vrsf_hint")
 
--- 候選排序（假名、擴充漢字排後面）
-liu_completion_translator = require("liu_completion_translator")
-
 -- 編碼解碼器（,,x 模式）
 liu_code_decoder_translator = require("liu_code_decoder")
+
+-- 自定詞翻譯器和過濾器
+liu_custom_word_translator = require("liu_custom_word_translator")
+liu_custom_word_filter = require("liu_custom_word_filter")
 
 -- 功能說明（,,h 模式）
 local liu_help_module = require("liu_help")
 liu_help_translator = liu_help_module.translator
 liu_help_filter = require("liu_help_filter")
 
--- 波浪號直出處理（單獨輸入 ~ 時直接輸出）
+-- 波浪號直出處理
 liu_tilde_processor = require("liu_tilde_processor")
+
+-- 英文候選處理（移除補全提示）
+liu_english_filter = require("liu_english_filter")
+
+-- 英文大小寫轉換（word] → Word，word]] → WORD）
+liu_english_case_filter = require("liu_english_case_filter")
+-- 反斜線處理（緩衝區為空時直接上屏）
+liu_backslash_processor = require("liu_backslash_processor")

@@ -54,13 +54,42 @@ Write-Host "  RIME 蝦米輸入方案 自動安裝工具" -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "本工具將執行以下作業："
-Write-Host "1. 下載蝦米輸入方案檔案到 Rime 資料夾"
-Write-Host "2. 安裝所需字體"
+Write-Host "1. 選擇輸入方案版本"
+Write-Host "2. 下載蝦米輸入方案檔案到 Rime 資料夾"
+Write-Host "3. 安裝所需字體"
 Write-Host ""
 Write-Host "※ 若有自訂設定尚未備份，請按 Ctrl+C 終止" -ForegroundColor Yellow
 Write-Host ""
 
-for ($i = 5; $i -ge 1; $i--) {
+# 版本選擇
+Write-Host "請選擇輸入方案版本：" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "1. 完整版（中打含英文詞庫版）（推薦）"
+Write-Host "   - 完整功能，中文輸入搭配英文詞庫輔助"
+Write-Host "   - 英文詞庫支援，大小寫轉換"
+Write-Host "   - 適合日常使用、程式開發"
+Write-Host ""
+Write-Host "2. 基礎版（中打不含英文詞庫）"
+Write-Host "   - 專注中文輸入，不含英文詞庫"
+Write-Host "   - 減少英文候選干擾"
+Write-Host "   - 適合純中文寫作"
+Write-Host ""
+
+do {
+    $choice = Read-Host "請輸入選項 (1 或 2)"
+} while ($choice -ne "1" -and $choice -ne "2")
+
+if ($choice -eq "1") {
+    $SCHEMA_VERSION = "mixed"
+    Write-Host "已選擇：完整版（中打含英文詞庫版）" -ForegroundColor Green
+} else {
+    $SCHEMA_VERSION = "chinese-only"
+    Write-Host "已選擇：基礎版（中打不含英文詞庫）" -ForegroundColor Green
+}
+
+Write-Host ""
+
+for ($i = 3; $i -ge 1; $i--) {
     Write-Host "`r將在 $i 秒後開始..." -NoNewline
     Start-Sleep -Seconds 1
 }
@@ -183,7 +212,21 @@ foreach ($file in $OPENCC_FILES) {
 Write-Host ""  # 換行
 
 Write-Host ""
-Write-Host "[ Step 3: 安裝字體 ]" -ForegroundColor Green
+Write-Host "[ Step 3: 配置輸入方案版本 ]" -ForegroundColor Green
+
+# 根據選擇配置對應版本
+if ($SCHEMA_VERSION -eq "mixed") {
+    Write-Host "正在配置完整版（中打含英文詞庫版）..."
+    Copy-Item "$RIME_FOLDER\configs\liur.schema.yaml" "$RIME_FOLDER\liur.schema.yaml" -Force
+    Write-Host "已配置為完整版（中打含英文詞庫版）" -ForegroundColor Green
+} else {
+    Write-Host "正在配置基礎版（中打不含英文詞庫）..."
+    Copy-Item "$RIME_FOLDER\configs\liur.chinese-only.schema.yaml" "$RIME_FOLDER\liur.schema.yaml" -Force
+    Write-Host "已配置為基礎版（中打不含英文詞庫）" -ForegroundColor Green
+}
+
+Write-Host ""
+Write-Host "[ Step 4: 安裝字體 ]" -ForegroundColor Green
 
 New-Item -ItemType Directory -Force -Path $FONT_FOLDER | Out-Null
 
@@ -217,7 +260,7 @@ foreach ($file in $FONT_FILES_WIN) {
 Write-Host ""  # 換行
 
 Write-Host ""
-Write-Host "[ Step 4: 完成 ]" -ForegroundColor Green
+Write-Host "[ Step 5: 完成 ]" -ForegroundColor Green
 Write-Host ""
 Write-Host "請手動重新部署小狼毫（右鍵點擊系統匣圖示 → 重新部署）" -ForegroundColor Yellow
 Write-Host ""

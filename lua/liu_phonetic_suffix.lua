@@ -90,8 +90,14 @@ local function get_phonetics_for_char(char, is_simplified)
     end
     
     -- 解析並排序
+    -- 先按 pos 排序（位置小的優先），pos 相同時按 gid 排序（群組 ID 小的優先）
     local entries = parse_gid_entries(gid_str)
-    table.sort(entries, function(a, b) return a.pos < b.pos end)
+    table.sort(entries, function(a, b)
+        if a.pos ~= b.pos then
+            return a.pos < b.pos
+        end
+        return a.gid < b.gid
+    end)
     
     -- 收集同音字
     local result = {}

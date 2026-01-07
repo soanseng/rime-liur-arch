@@ -1,78 +1,75 @@
 -- liu_completion_translator.lua
--- 排序過濾器：將日文假名和擴充漢字排到候選列表後面
--- 排序順序：一般漢字 > 日文假名 > 擴充漢字
+-- 排序過濾器：自定詞排在完整匹配後面，英文排最後
+-- 優化版本：減少記憶體使用
 
 local common = require("liu_common")
-local is_kana = common.is_kana
 local is_extended_charset = common.is_extended_charset
 
--- 檢查候選字的類型：0=一般, 1=假名, 2=擴充
-local function get_char_type(text)
-    for _, code in utf8.codes(text) do
-        if is_extended_charset(code) then
-            return 2  -- 擴充漢字優先級最低
-        end
-        if is_kana(code) then
-            return 1  -- 假名次之
+local function is_pure_ascii_english(text)
+    if not text or #text == 0 then return false end
+    local b = string.byte(text, 1)
+    if b > 127 then return false end
+    local has_letter = false
+    for i = 1, #text do
+        b = string.byte(text, i)
+        if b > 126 or b < 32 then return false end
+        if (b >= 65 and b <= 90) or (b >= 97 and b <= 122) then
+            has_letter = true
         end
     end
-    return 0  -- 一般漢字優先
+    return has_letter
 end
 
 local function filter(input, env)
-    local context = env.engine.context
-    local input_code = context.input or ""
-    
-    -- 造詞模式下不重新排序，保持原始順序
-    -- 檢測方式：1. 輸入以 ; 開頭（但不是 ;; 讀音查詢）
-    --          2. 或者 segment 有 mkst tag
-    local is_mkst = false
-    if input_code:match("^;[^;]") then
-        is_mkst = true
-    else
-        local seg = context.composition:back()
-        if seg and seg:has_tag("mkst") then
-            is_mkst = true
-        end
-    end
-    
-    if is_mkst then
-        for cand in input:iter() do
-            yield(cand)
-        end
-        return
-    end
-    
-    local kana_cands = {}
-    local ext_cands = {}
-    local show_extended = context:get_option("extended_charset")
-    
+    local custom_cands = {}
+    local english_cands = {}
+    local show_extended = env.engine.context:get_option("extended_charset")
+    local had_exact_match = false
+
     for cand in input:iter() do
-        local char_type = get_char_type(cand.text)
-        
-        if char_type == 0 then
-            -- 一般漢字：直接輸出
-            yield(cand)
-        elseif char_type == 1 then
-            -- 假名：緩存
-            table.insert(kana_cands, cand)
+        local text = cand.text
+
+        if cand.type == "custom" then
+            if had_exact_match then
+                yield(cand)
+            else
+                table.insert(custom_cands, cand)
+            end
+        elseif is_pure_ascii_english(text) then
+            table.insert(english_cands, cand)
         else
-            -- 擴充漢字：只在開啟擴充字集時緩存
-            if show_extended then
-                table.insert(ext_cands, cand)
+            -- 檢查擴充字集
+            local is_ext = false
+            for _, code in utf8.codes(text) do
+                if is_extended_charset(code) then
+                    is_ext = true
+                    break
+                end
+            end
+
+            if is_ext and not show_extended then
+                -- skip
+            else
+                local comment = cand.comment or ""
+                local is_completion = comment:find("▸", 1, true) ~= nil
+                
+                if not is_completion and not had_exact_match then
+                    had_exact_match = true
+                    yield(cand)
+                    -- 輸出自定詞
+                    for _, c in ipairs(custom_cands) do yield(c) end
+                    custom_cands = {}
+                else
+                    yield(cand)
+                end
             end
         end
     end
-    
-    -- 輸出假名
-    for _, cand in ipairs(kana_cands) do
-        yield(cand)
-    end
-    
-    -- 輸出擴充漢字
-    for _, cand in ipairs(ext_cands) do
-        yield(cand)
-    end
+
+    -- 剩餘的自定詞
+    for _, c in ipairs(custom_cands) do yield(c) end
+    -- 英文排最後
+    for _, c in ipairs(english_cands) do yield(c) end
 end
 
 return filter

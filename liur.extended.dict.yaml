@@ -21,6 +21,5 @@ encoder:
 import_tables:
   - openxiami_TCJP     
   - openxiami_TradExt
-  - openxiami_CustomWord
-
+# openxiami_CustomWord 改由 lua_translator@liu_custom_word_translator 處理
 ...

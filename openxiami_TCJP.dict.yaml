@@ -1,11 +1,11 @@
-﻿#	Rime	schema	中州輸入法的字碼檔
-#	encoding:	utf-8
+# Rime schema 中州輸入法的字碼檔
+# encoding: utf-8
 #
 ---
-name:	openxiami_TCJP
-version:	"1"
-sort:	original	#按	字詞		排序	輸入original,以	字詞頻		排序	輸入	by_weight
-#字碼格式:	字	+	Tab	+	字碼
+name: openxiami_TCJP
+version: "1"
+sort: original #按 字詞  排序 輸入original,以 字詞頻  排序 輸入 by_weight
+#字碼格式: 字 + Tab + 字碼
 ...
 對	a
 寸	aa
@@ -31345,7 +31345,7 @@ sort:	original	#按	字詞		排序	輸入original,以	字詞頻		排序	輸入	b
 叓	vux
 叓	vuxv
 雋	vuy
-丶	vv
+、	vv
 袘	vva
 複	vvdp
 雔	vve
@@ -39067,7 +39067,7 @@ sort:	original	#按	字詞		排序	輸入original,以	字詞頻		排序	輸入	b
 うん	un,
 ウン	un.
 ヷ	va.
-ve.	ヹ	ve.
+ヹ	ve.
 ヴァ	va.
 ヴェ	ve.
 ヸ	vi.
@@ -39125,7 +39125,7 @@ ve.	ヹ	ve.
 〇	o
 □	oo
 ？	s.
-、	vv
+丶	vv
 ！	v.
 ﹁	v[
 ⅸ	v[
@@ -39169,7 +39169,7 @@ ve.	ヹ	ve.
 ㄚ	,av
 а	,aw
 ㏂	,a.m
-8	,b
+８	,b
 Ⅷ	,b
 β	,b
 ㄅ	,b
@@ -39245,7 +39245,7 @@ ve.	ヹ	ve.
 ☰	,byv
 ☴	,byw
 ⒏	,b.
-7	,c
+７	,c
 Ⅶ	,c
 ㄘ	,c
 ⅶ	,c
@@ -39451,7 +39451,7 @@ $	,dolr
 伍	,dw
 ㍾	,dw
 ㍾	,dwv
-1	,e
+１	,e
 Ⅰ	,e
 ㄝ	,e
 ㄜ	,e
@@ -39637,7 +39637,7 @@ $	,dolr
 ﹊	,e.e
 ﹎	,e.e
 ﹎	,e.ev
-4	,f
+４	,f
 Ⅳ	,f
 ㄈ	,f
 ♀	,f
@@ -40093,7 +40093,7 @@ $	,dolr
 扌	,jxv
 ↬	,jz
 ⒑	,j.
-9	,k
+９	,k
 Ⅸ	,k
 ㄎ	,k
 κ	,k
@@ -40149,7 +40149,7 @@ $	,dolr
 ㎾	,kw
 ⒐	,k.
 ㏍	,k.k
-6	,l
+６	,l
 Ⅵ	,l
 ㄌ	,l
 λ	,l
@@ -40336,7 +40336,7 @@ $	,dolr
 ↯	,nz
 ↯	,nzv
 ǜ	,n..
-0	,o
+０	,o
 ●	,o
 ○	,o
 ㄛ	,o
@@ -40858,7 +40858,7 @@ $	,dolr
 ≠	,qx
 犭	,qx
 犭	,qxv
-2	,r
+２	,r
 Ⅱ	,r
 ㄖ	,r
 ㄦ	,r
@@ -40935,7 +40935,7 @@ $	,dolr
 ﹦	,rw
 ˊ	,ry
 ⒉	,r.
-3	,s
+３	,s
 Ⅲ	,s
 ㄙ	,s
 ～	,s
@@ -41250,7 +41250,7 @@ $	,sif
 ︽	,v[[
 ﹂	,v]
 ︾	,v]]
-5	,w
+５	,w
 Ⅴ	,w
 ㄨ	,w
 ω	,w
@@ -41777,3 +41777,4 @@ $	,sif
 ︾	]]v
 ︾	]]vr
 ︼	]]vv
+︾	]]w

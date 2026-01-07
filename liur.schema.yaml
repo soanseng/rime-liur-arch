@@ -93,17 +93,19 @@ engine:
     - lua_translator@date_translator  # 符號清單變體（`a 字母變體，`01 數字變體）
     - lua_translator@liu_phonetic_suffix_translator  # 同音字翻譯器（選中後按 '）
     - lua_translator@liu_code_decoder_translator  # 編碼解碼器（,,x 模式）
+    - lua_translator@liu_custom_word_translator  # 自定詞翻譯器
     - script_translator@all_bpm
     - table_translator@mkst
     - table_translator@fixed
     - table_translator@liurqry
     - table_translator
+    - table_translator@easy_en  # 英文輸入（獨立翻譯器）
     - script_translator@pinyin  # 漢語拼音（;' 引導）
     - script_translator@phonetic
     - table_translator@symbols
 
   filters:
-    - lua_filter@liu_completion_translator	#候選排序（假名、擴充漢字排後面）- 造詞模式下跳過
+    - lua_filter@liu_custom_word_filter	#候選排序：漢字 > 自定詞 > 假名 > 擴充 > 英文
     - lua_filter@liu_charset_filter	#自定義字符集過濾（CJK Compatibility Forms 視為常用字集）
     - lua_filter@liu_wildcard_filter	#查碼模式下禁用萬用字元
     - lua_filter@liu_wildcard_code_hint	#萬用字元查詢時顯示編碼
@@ -122,6 +124,8 @@ engine:
     - lua_filter@liu_symbols_hint_filter	#符號清單提示處理（必須在所有 simplifier 之後，uniquifier 之前）
     - lua_filter@liu_help_filter	#按鍵說明處理（必須在所有 simplifier 之後）
     - lua_filter@liu_fancy_filter	#變體英數模式 preedit 處理
+    - lua_filter@liu_english_case_filter	#英文大小寫轉換（word] → Word，word]] → WORD）
+    - lua_filter@liu_english_filter	#移除英文候選的補全提示（必須在 uniquifier 之前）
     - uniquifier	#過濾重複的候選字（必須在所有 filter 之後）
     # - single_char_filter  #單字優先
 
@@ -200,8 +204,8 @@ fixed:
   initial_quality: 100
 
 mkst:
-  enable_encoder: true
-  enable_user_dict: true
+  enable_encoder: false
+  enable_user_dict: false
   __include: /translator
   enable_sentence: true
   prefix: ';'
@@ -223,6 +227,17 @@ liurqry:
   tag: liurqry
   preedit_format:
     - xform/^/《讀音查詢》/
+
+# 英文輸入（獨立翻譯器，只對 abc tag 生效）
+easy_en:
+  dictionary: easy_en
+  db_class: tabledb
+  enable_completion: true
+  enable_sentence: false
+  enable_user_dict: false
+  enable_encoder: false
+  tag: abc
+  initial_quality: -1
 
 all_bpm:
   tag: all_bpm

@@ -2,11 +2,12 @@
 -- VRSF 選字提示：當候選字有 ^V/^R/^S/^F 輔碼且與當前輸入匹配時，顯示提示
 -- 例如：輸入 aaa，龘 的編碼是 AAA^V，則顯示 ▸ ⟨v⟩
 -- 只在正常模式下顯示，反查模式不處理
+-- 注意：w2c 中的 VRSF 編碼已經過濾，只包含「真正能用的」
 
 -- 全局緩存
 local code_dict_cache = nil
 
--- 載入編碼字典
+-- 載入編碼字典（字 -> 編碼列表）
 local function load_code_dict()
     if code_dict_cache then
         return code_dict_cache

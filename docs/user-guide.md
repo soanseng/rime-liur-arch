@@ -9,13 +9,21 @@
 - **macOS**: 鼠鬚管 ([Squirrel](https://github.com/rime/squirrel/releases))
 - **Windows**: 小狼毫 ([Weasel](https://github.com/rime/weasel/releases))
 
+### 版本差異說明
+
+- **基礎版（中打不含英文詞庫）**：不含英文詞庫，英文需手動輸入完整後按 Enter 上屏
+- **完整版（中打含英文詞庫版）**：包含英文詞庫，支援英文自動補全和大小寫轉換
+
 ### 手動安裝步驟
 
 1. 下載本專案所有檔案
 2. 將檔案複製到 Rime 使用者資料夾：
    - **macOS**: `~/Library/Rime/`
    - **Windows**: `%AppData%\Rime\`
-3. 重新部署 Rime
+3. 選擇版本：
+   - **基礎版（中打不含英文詞庫）**：從 `configs` 資料夾複製 `liur.chinese-only.schema.yaml` 到 Rime 使用者資料夾，並重新命名為 `liur.schema.yaml`
+   - **完整版（中打含英文詞庫版）**：從 `configs` 資料夾複製 `liur.schema.yaml` 到 Rime 使用者資料夾
+4. 重新部署 Rime
 
 ### 指令安裝步驟
 
@@ -39,12 +47,24 @@ irm https://raw.githubusercontent.com/ryanwuson/rime-liur/main/rime_liur_install
 
 ## 二、基本輸入
 
-### 蝦米字碼及英文混合輸入
+### 蝦米字碼輸入
 
 - 直接輸入蝦米字碼，按下 `Space` 或數字鍵，即可選字上屏
 - 如果輸入的是 `www.google.com` ，按下 `Enter`，即可將英文上屏
 
 ![02.1基本輸入](images/02.1基本輸入.gif)
+
+### 英文詞庫輸入（完整版限定）
+
+在完整版（中打含英文詞庫版）中，英文單詞會自動出現在候選選單中：
+
+- **自動補全**：輸入 `app` 會在候選中顯示 `apple`、`application` 等
+- **空白鍵上屏**：選擇英文單詞後按 `Space` 即可上屏
+- **大小寫轉換**：
+  - 輸入英文單詞後按 `]` → 首字母大寫（如：`word` → `Word`）
+  - 輸入英文單詞後按 `]]` → 全部大寫（如：`word` → `WORD`）
+
+![02.3英文詞庫](images/02.3英文詞庫.gif)
 
 ### 英文輸入模式
 
