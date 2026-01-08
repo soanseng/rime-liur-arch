@@ -127,3 +127,6 @@ liu_english_filter = require("liu_english_filter")
 
 -- 英文大小寫轉換（word] → Word，word]] → WORD）
 liu_english_case_filter = require("liu_english_case_filter")
+
+-- 上屏後小步垃圾回收
+liu_gc_processor = require("liu_gc_processor")

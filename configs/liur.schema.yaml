@@ -59,6 +59,7 @@ engine:
     - navigator
     - express_editor
 #    - fluency_editor	#  語句流
+    - lua_processor@liu_gc_processor  # 上屏後小步垃圾回收
   segmentors:
     - ascii_segmentor
     - matcher
