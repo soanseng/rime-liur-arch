@@ -3,8 +3,10 @@
 -- type="custom" 讓 filter 可以識別
 
 local custom_words = nil
+local load_time = nil
 
 local function load_custom_words()
+    -- 檢查檔案是否有更新（每次部署後重新載入）
     if custom_words then return custom_words end
     custom_words = {}
 
@@ -20,10 +22,13 @@ local function load_custom_words()
         if file then
             local in_data = false
             for line in file:lines() do
+                -- 移除 Windows 換行符 \r
+                line = line:gsub("\r$", "")
                 if line == "..." then
                     in_data = true
                 elseif in_data and #line > 0 and line:byte(1) ~= 35 then  -- 35 = '#'
-                    local word, code = line:match("^([^\t]+)\t([^\t]+)$")
+                    -- 支援兩欄或三欄格式（字詞 TAB 編碼 [TAB 權重]）
+                    local word, code = line:match("^([^\t]+)\t([^\t]+)")
                     if word and code then
                         code = code:lower()
                         local list = custom_words[code]
