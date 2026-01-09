@@ -95,12 +95,12 @@ engine:
     - lua_translator@date_translator  # 符號清單變體（`a 字母變體，`01 數字變體）
     - lua_translator@liu_phonetic_suffix_translator  # 同音字翻譯器（選中後按 '）
     - lua_translator@liu_code_decoder_translator  # 編碼解碼器（,,x 模式）
-    - lua_translator@liu_custom_word_translator  # 自定詞翻譯器
     - script_translator@all_bpm
     - table_translator@mkst
     - table_translator@fixed
     - table_translator@liurqry
     - table_translator
+    - lua_translator@liu_custom_word_translator  # 自定詞翻譯器（必須在 table_translator 之後，讓蝦米補字優先）
     - table_translator@easy_en  # 英文輸入（獨立翻譯器）
     - script_translator@pinyin  # 漢語拼音（;' 引導）
     - script_translator@phonetic
