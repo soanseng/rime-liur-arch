@@ -101,8 +101,8 @@ engine:
     - table_translator@mkst
     - table_translator@fixed
     - table_translator@liurqry
+    - lua_translator@liu_custom_word_translator  # 自定詞翻譯器（在 table_translator 之前）
     - table_translator
-    - lua_translator@liu_custom_word_translator  # 自定詞翻譯器（必須在 table_translator 之後，讓蝦米補字優先）
     # - table_translator@easy_en  # 英文輸入（已註解 - 純中文版）
     - script_translator@pinyin  # 漢語拼音（;' 引導）
     - script_translator@phonetic
