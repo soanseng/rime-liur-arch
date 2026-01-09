@@ -44,6 +44,7 @@ switches:
 engine:
   processors:
     - ascii_composer
+    - lua_processor@liu_schema_switch_processor      # 方案切換狀態保持（必須在 key_binder 之前攔截 Ctrl+/）
     - lua_processor@liu_tilde_processor              # 波浪號直出（必須在 recognizer 之前）
     - lua_processor@liu_fancy_processor              # 變體英數模式按鍵處理（必須在 recognizer 之前攔截 ` 鍵）
     - lua_processor@liu_extended_backspace           # `` 擴充模式（必須在 recognizer 之前攔截 ` 鍵）
@@ -54,6 +55,7 @@ engine:
     - lua_processor@liu_phonetic_hint_processor      # 讀音查詢模式下屏蔽 ctrl+'
     - lua_processor@liu_symbols_processor            # 符號清單模式下屏蔽 ctrl+'
     - lua_processor@liu_phonetic_suffix_processor    # 同音字模式（選中後按 '）
+    - lua_processor@liu_gc_processor                 # 上屏後小步垃圾回收
     - key_binder
     - speller
 #    - punctuator
@@ -61,7 +63,6 @@ engine:
     - navigator
     - express_editor
 #    - fluency_editor	#  語句流
-    - lua_processor@liu_gc_processor  # 上屏後小步垃圾回收
   segmentors:
     - ascii_segmentor
     - matcher
@@ -314,6 +315,7 @@ key_binder:
     - {accept: "Shift+Tab", send: Page_Up, when: has_menu}      # Shift+Tab向上翻頁
     - {accept: "Shift+Up", send: Page_Up, when: has_menu}       # Shift+上向上翻頁
     - {accept: "Shift+Down", send: Page_Down, when: has_menu}   # Shift+下向下翻頁
+    - {accept: "Control+slash", select: easy_en, when: always}  # Ctrl+/ 切換到 Easy English
 recognizer:
   import_preset: default
 

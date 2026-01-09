@@ -223,7 +223,7 @@ irm https://raw.githubusercontent.com/ryanwuson/rime-liur/main/rime_liur_install
 
 - **引導鍵**：`;'`
 - **提示**：《拼音輸入》▸
-- **說明**：使用漢語拼音輸入中文，支援數字0~5鍵入聲調，可連續輸入
+- **說明**：使用漢語拼音輸入中文，支援數字1~5鍵入聲調，可連續輸入
 - **舉例**：`;'binfenye2danwan2taibei` → 繽紛耶誕玩台北
 
 ![05.4拼音輸入](images/05.4拼音輸入.gif)

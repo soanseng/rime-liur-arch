@@ -130,3 +130,6 @@ liu_english_case_filter = require("liu_english_case_filter")
 
 -- 上屏後小步垃圾回收
 liu_gc_processor = require("liu_gc_processor")
+
+-- 方案切換狀態保持（liur ↔ easy_en 切換時保持 ascii_mode 狀態）
+liu_schema_switch_processor = require("liu_schema_switch_processor")
