@@ -105,6 +105,37 @@ while true; do
 done
 
 echo
+
+# 自定義詞庫選項
+echo -e "${YELLOW}是否覆蓋自定義詞庫？${NC}"
+echo
+echo "自定義詞庫 (openxiami_CustomWord.dict.yaml) 用於儲存您的個人詞彙。"
+echo "若您已有自訂詞彙，建議選擇「保留」以避免遺失。"
+echo
+echo "1. 保留（推薦）- 保留現有的自定義詞庫"
+echo "2. 覆蓋 - 下載新的空白詞庫（會清除您的自訂詞彙）"
+echo
+
+while true; do
+    read -p "請輸入選項 (1 或 2): " customChoice < /dev/tty
+    case $customChoice in
+        1)
+            KEEP_CUSTOM_DICT=true
+            echo -e "${GREEN}已選擇：保留自定義詞庫${NC}"
+            break
+            ;;
+        2)
+            KEEP_CUSTOM_DICT=false
+            echo -e "${GREEN}已選擇：覆蓋自定義詞庫${NC}"
+            break
+            ;;
+        *)
+            echo -e "${RED}請輸入 1 或 2${NC}"
+            ;;
+    esac
+done
+
+echo
 for i in {3..1}; do
     printf "\r將在 %d 秒後開始..." "$i"
     sleep 1
@@ -183,8 +214,13 @@ CURRENT=0
 # 下載主要檔案
 for file in "${ROOT_FILES[@]}"; do
     ((CURRENT++))
-    show_progress $CURRENT $TOTAL_FILES "$file"
-    curl -fsSL "${GITHUB_RAW}/${file}" -o "$RIME_FOLDER/$file"
+    # 檢查是否為自定義詞庫且選擇保留
+    if [ "$file" = "openxiami_CustomWord.dict.yaml" ] && [ "$KEEP_CUSTOM_DICT" = true ] && [ -f "$RIME_FOLDER/$file" ]; then
+        show_progress $CURRENT $TOTAL_FILES "$file [保留]"
+    else
+        show_progress $CURRENT $TOTAL_FILES "$file"
+        curl -fsSL "${GITHUB_RAW}/${file}" -o "$RIME_FOLDER/$file"
+    fi
 done
 
 # 下載 Lua 檔案

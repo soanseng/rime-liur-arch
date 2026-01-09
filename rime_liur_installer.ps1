@@ -89,6 +89,30 @@ if ($choice -eq "1") {
 
 Write-Host ""
 
+# 自定義詞庫選項
+Write-Host "是否覆蓋自定義詞庫？" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "自定義詞庫 (openxiami_CustomWord.dict.yaml) 用於儲存您的個人詞彙。"
+Write-Host "若您已有自訂詞彙，建議選擇「保留」以避免遺失。"
+Write-Host ""
+Write-Host "1. 保留（推薦）- 保留現有的自定義詞庫"
+Write-Host "2. 覆蓋 - 下載新的空白詞庫（會清除您的自訂詞彙）"
+Write-Host ""
+
+do {
+    $customChoice = Read-Host "請輸入選項 (1 或 2)"
+} while ($customChoice -ne "1" -and $customChoice -ne "2")
+
+if ($customChoice -eq "1") {
+    $KEEP_CUSTOM_DICT = $true
+    Write-Host "已選擇：保留自定義詞庫" -ForegroundColor Green
+} else {
+    $KEEP_CUSTOM_DICT = $false
+    Write-Host "已選擇：覆蓋自定義詞庫" -ForegroundColor Green
+}
+
+Write-Host ""
+
 for ($i = 3; $i -ge 1; $i--) {
     Write-Host "`r將在 $i 秒後開始..." -NoNewline
     Start-Sleep -Seconds 1
@@ -182,8 +206,13 @@ $current = 0
 # 下載主要檔案
 foreach ($file in $ROOT_FILES) {
     $current++
-    Show-Progress -Current $current -Total $TOTAL_FILES -FileName $file
-    Invoke-WebRequest -Uri "$GITHUB_RAW/$file" -OutFile "$RIME_FOLDER\$file" | Out-Null
+    # 檢查是否為自定義詞庫且選擇保留
+    if ($file -eq "openxiami_CustomWord.dict.yaml" -and $KEEP_CUSTOM_DICT -and (Test-Path "$RIME_FOLDER\$file")) {
+        Show-Progress -Current $current -Total $TOTAL_FILES -FileName "$file [保留]"
+    } else {
+        Show-Progress -Current $current -Total $TOTAL_FILES -FileName $file
+        Invoke-WebRequest -Uri "$GITHUB_RAW/$file" -OutFile "$RIME_FOLDER\$file" | Out-Null
+    }
 }
 
 # 下載 Lua 檔案
