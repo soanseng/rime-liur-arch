@@ -89,14 +89,18 @@ if ($choice -eq "1") {
 
 Write-Host ""
 
-# 自定義詞庫選項
-Write-Host "是否覆蓋自定義詞庫？" -ForegroundColor Yellow
+# 自定義設定檔選項
+Write-Host "是否覆蓋自定義設定檔？" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "自定義詞庫 (openxiami_CustomWord.dict.yaml) 用於儲存您的個人詞彙。"
-Write-Host "若您已有自訂詞彙，建議選擇「保留」以避免遺失。"
+Write-Host "以下檔案用於儲存您的個人設定與詞彙："
+Write-Host "• openxiami_CustomWord.dict.yaml（自定義詞庫）"
+Write-Host "• default.custom.yaml（全域設定）"
+Write-Host "• weasel.custom.yaml（小狼毫外觀設定）"
 Write-Host ""
-Write-Host "1. 保留（推薦）- 保留現有的自定義詞庫"
-Write-Host "2. 覆蓋 - 下載新的空白詞庫（會清除您的自訂詞彙）"
+Write-Host "若您已有自訂設定，建議選擇「保留」以避免遺失。"
+Write-Host ""
+Write-Host "1. 保留（推薦）- 保留現有的自定義設定檔"
+Write-Host "2. 覆蓋 - 下載預設設定檔（會清除您的自訂設定）"
 Write-Host ""
 
 do {
@@ -104,11 +108,11 @@ do {
 } while ($customChoice -ne "1" -and $customChoice -ne "2")
 
 if ($customChoice -eq "1") {
-    $KEEP_CUSTOM_DICT = $true
-    Write-Host "已選擇：保留自定義詞庫" -ForegroundColor Green
+    $KEEP_CUSTOM_FILES = $true
+    Write-Host "已選擇：保留自定義設定檔" -ForegroundColor Green
 } else {
-    $KEEP_CUSTOM_DICT = $false
-    Write-Host "已選擇：覆蓋自定義詞庫" -ForegroundColor Green
+    $KEEP_CUSTOM_FILES = $false
+    Write-Host "已選擇：覆蓋自定義設定檔" -ForegroundColor Green
 }
 
 Write-Host ""
@@ -203,11 +207,14 @@ New-Item -ItemType Directory -Force -Path "$RIME_FOLDER\configs" | Out-Null
 
 $current = 0
 
+# 需要保留的自定義設定檔清單
+$CUSTOM_FILES = @("openxiami_CustomWord.dict.yaml", "default.custom.yaml", "weasel.custom.yaml")
+
 # 下載主要檔案
 foreach ($file in $ROOT_FILES) {
     $current++
-    # 檢查是否為自定義詞庫且選擇保留
-    if ($file -eq "openxiami_CustomWord.dict.yaml" -and $KEEP_CUSTOM_DICT -and (Test-Path "$RIME_FOLDER\$file")) {
+    # 檢查是否為自定義設定檔且選擇保留
+    if ($CUSTOM_FILES -contains $file -and $KEEP_CUSTOM_FILES -and (Test-Path "$RIME_FOLDER\$file")) {
         Show-Progress -Current $current -Total $TOTAL_FILES -FileName "$file [保留]"
     } else {
         Show-Progress -Current $current -Total $TOTAL_FILES -FileName $file

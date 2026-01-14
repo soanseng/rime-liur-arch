@@ -106,27 +106,31 @@ done
 
 echo
 
-# 自定義詞庫選項
-echo -e "${YELLOW}是否覆蓋自定義詞庫？${NC}"
+# 自定義設定檔選項
+echo -e "${YELLOW}是否覆蓋自定義設定檔？${NC}"
 echo
-echo "自定義詞庫 (openxiami_CustomWord.dict.yaml) 用於儲存您的個人詞彙。"
-echo "若您已有自訂詞彙，建議選擇「保留」以避免遺失。"
+echo "以下檔案用於儲存您的個人設定與詞彙："
+echo "• openxiami_CustomWord.dict.yaml（自定義詞庫）"
+echo "• default.custom.yaml（全域設定）"
+echo "• squirrel.custom.yaml（鼠鬚管外觀設定）"
 echo
-echo "1. 保留（推薦）- 保留現有的自定義詞庫"
-echo "2. 覆蓋 - 下載新的空白詞庫（會清除您的自訂詞彙）"
+echo "若您已有自訂設定，建議選擇「保留」以避免遺失。"
+echo
+echo "1. 保留（推薦）- 保留現有的自定義設定檔"
+echo "2. 覆蓋 - 下載預設設定檔（會清除您的自訂設定）"
 echo
 
 while true; do
     read -p "請輸入選項 (1 或 2): " customChoice < /dev/tty
     case $customChoice in
         1)
-            KEEP_CUSTOM_DICT=true
-            echo -e "${GREEN}已選擇：保留自定義詞庫${NC}"
+            KEEP_CUSTOM_FILES=true
+            echo -e "${GREEN}已選擇：保留自定義設定檔${NC}"
             break
             ;;
         2)
-            KEEP_CUSTOM_DICT=false
-            echo -e "${GREEN}已選擇：覆蓋自定義詞庫${NC}"
+            KEEP_CUSTOM_FILES=false
+            echo -e "${GREEN}已選擇：覆蓋自定義設定檔${NC}"
             break
             ;;
         *)
@@ -211,11 +215,14 @@ mkdir -p "$RIME_FOLDER/configs"
 
 CURRENT=0
 
+# 需要保留的自定義設定檔清單
+CUSTOM_FILES=("openxiami_CustomWord.dict.yaml" "default.custom.yaml" "squirrel.custom.yaml")
+
 # 下載主要檔案
 for file in "${ROOT_FILES[@]}"; do
     ((CURRENT++))
-    # 檢查是否為自定義詞庫且選擇保留
-    if [ "$file" = "openxiami_CustomWord.dict.yaml" ] && [ "$KEEP_CUSTOM_DICT" = true ] && [ -f "$RIME_FOLDER/$file" ]; then
+    # 檢查是否為自定義設定檔且選擇保留
+    if [[ " ${CUSTOM_FILES[*]} " =~ " ${file} " ]] && [ "$KEEP_CUSTOM_FILES" = true ] && [ -f "$RIME_FOLDER/$file" ]; then
         show_progress $CURRENT $TOTAL_FILES "$file [保留]"
     else
         show_progress $CURRENT $TOTAL_FILES "$file"
