@@ -11,7 +11,7 @@ schema:
   description: |
     地球拼音洋蔥版，針對台灣用語調整
   dependencies:
-    - terra_pinyin_onion_add
+    # - terra_pinyin_onion_add  # 修復循環依賴問題
 
 engine:
   processors:
