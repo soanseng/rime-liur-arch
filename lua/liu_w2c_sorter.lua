@@ -7,45 +7,18 @@
 -- 5. 日期時間候選項（datetime）直接輸出，不做反查
 
 -- 全局緩存
-local code_dict_cache = nil
+-- 全局緩存
 local opencc_s2t_cache = nil
+local liu_data = require("liu_data")
 
--- 載入編碼字典（只載入一次）- 優化版
+-- 載入編碼字典（從共用資料中心獲取）
 local function load_code_dict()
-    if code_dict_cache then
-        return code_dict_cache
-    end
-    
-    local dict = {}
-    local dict_file = io.open(rime_api.get_user_data_dir() .. "/opencc/liu_w2c.txt", "r")
-    if not dict_file then
-        dict_file = io.open(rime_api.get_shared_data_dir() .. "/opencc/liu_w2c.txt", "r")
-    end
-    
-    if dict_file then
-        -- 一次性讀取整個文件（比逐行讀取更快）
-        local content = dict_file:read("*all")
-        dict_file:close()
-        
-        for line in content:gmatch("[^\r\n]+") do
-            local char, code_str = line:match("^([^\t]+)\t~(.+)$")
-            if char and code_str then
-                local codes = {}
-                -- 先將 \⟩ 替換為臨時標記
-                local temp_str = code_str:gsub("\\⟩", "\x01")
-                for code in temp_str:gmatch("⟨([^⟩]+)⟩") do
-                    -- 將臨時標記還原為 ⟩
-                    code = code:gsub("\x01", "⟩")
-                    codes[#codes + 1] = code
-                end
-                dict[char] = codes
-            end
-        end
-    end
-    
-    code_dict_cache = dict
-    return dict
+    -- 直接調用 liu_data 獲取資料，liu_data 會負責快取管理
+    local raw_data = liu_data.get_w2c_data()
+    return raw_data
 end
+
+-- 獲取 OpenCC 實例（緩存）
 
 -- 獲取 OpenCC 實例（緩存）
 local function get_opencc_s2t()
@@ -125,17 +98,26 @@ local function liu_w2c_sorter(input, env)
                         
                         for pos, code_point in utf8.codes(cand.text) do
                             local char = utf8.char(code_point)
-                            local codes = code_dict[char]
+                            local raw_codes = code_dict[char]
+                            local codes = {}
                             
                             -- 簡體模式：如果找不到編碼，嘗試查找繁體字編碼
-                            if opencc and (not codes or #codes == 0) then
+                            if opencc and not raw_codes then
                                 local trad_char = opencc:convert(char)
                                 if trad_char ~= char then
-                                    codes = code_dict[trad_char]
+                                    raw_codes = code_dict[trad_char]
                                 end
                             end
                             
-                            if codes and #codes > 0 then
+                            if raw_codes then
+                                -- 解析原始編碼字串 "⟨xxx⟩⟨yyy⟩"
+                                local temp_str = raw_codes:gsub("\\⟩", "\x01")
+                                for code in temp_str:gmatch("⟨([^⟩]+)⟩") do
+                                    codes[#codes + 1] = code:gsub("\x01", "⟩")
+                                end
+                            end
+                            
+                            if #codes > 0 then
                                 table.insert(char_codes, codes)
                             else
                                 has_all_codes = false
@@ -164,17 +146,26 @@ local function liu_w2c_sorter(input, env)
                     end
                     
                     -- 處理單字
-                    local codes = code_dict[cand.text]
+                    local raw_codes = code_dict[cand.text]
+                    local codes = {}
                     
                     -- 簡體模式：如果找不到編碼，嘗試查找繁體字編碼
-                    if opencc and (not codes or #codes == 0) then
+                    if opencc and not raw_codes then
                         local trad_text = opencc:convert(cand.text)
                         if trad_text ~= cand.text then
-                            codes = code_dict[trad_text]
+                            raw_codes = code_dict[trad_text]
                         end
                     end
                     
-                    if codes and #codes > 0 then
+                    if raw_codes then
+                         -- 解析原始編碼字串 "⟨xxx⟩⟨yyy⟩"
+                        local temp_str = raw_codes:gsub("\\⟩", "\x01")
+                        for code in temp_str:gmatch("⟨([^⟩]+)⟩") do
+                            codes[#codes + 1] = code:gsub("\x01", "⟩")
+                        end
+                    end
+                    
+                    if #codes > 0 then
                         -- 直接使用 liu_w2c.txt 中的順序（已排序）
                         local new_comment = "~"
                         for i, code in ipairs(codes) do

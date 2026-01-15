@@ -5,53 +5,14 @@
 -- 同音字模式結束後清除大型資料，避免持續佔用記憶體
 
 -- ============ 全局快取 ============
--- 注意：這些資料在同音字模式結束後會被清除
-local groups_trad = nil      -- 繁體群組列表（字串陣列）
-local groups_simp = nil      -- 簡體群組列表
-local char_to_gids_trad = nil -- 繁體：字 → "gid:pos,gid:pos,..."
-local char_to_gids_simp = nil -- 簡體
-local code_data = nil
+local liu_data = require("liu_data")
 local opencc_s2t = nil
 
 -- ============ 數據載入函數 ============
 
 -- 載入群組格式的同音字資料（優化版）
 local function load_phonetic_groups(is_simplified)
-    local groups = {}        -- 群組列表，每個元素是原始字串
-    local char_to_gids = {}  -- 字 → "gid:pos,gid:pos,..."
-    
-    local filename = is_simplified and "liu_phonetic_simp.txt" or "liu_phonetic.txt"
-    local file = io.open(rime_api.get_user_data_dir() .. "/opencc/" .. filename, "r")
-    if not file then
-        file = io.open(rime_api.get_shared_data_dir() .. "/opencc/" .. filename, "r")
-    end
-    
-    if file then
-        local gid = 0
-        for line in file:lines() do
-            local first_char, rest = line:match("^([^\t]+)\t(.+)$")
-            if first_char and rest then
-                gid = gid + 1
-                -- 存儲完整的群組字串（第一個字 + 空格 + 其他字）
-                groups[gid] = first_char .. " " .. rest
-                
-                -- 記錄每個字屬於哪些群組
-                local pos = 1
-                for char in (first_char .. " " .. rest):gmatch("[^ ]+") do
-                    local entry = gid .. ":" .. pos
-                    if char_to_gids[char] then
-                        char_to_gids[char] = char_to_gids[char] .. "," .. entry
-                    else
-                        char_to_gids[char] = entry
-                    end
-                    pos = pos + 1
-                end
-            end
-        end
-        file:close()
-    end
-    
-    return groups, char_to_gids
+    return liu_data.get_phonetic_data(is_simplified)
 end
 
 -- 解析 gid:pos 字串
@@ -68,21 +29,7 @@ end
 
 -- 即時查詢同音字
 local function get_phonetics_for_char(char, is_simplified)
-    local groups, char_to_gids
-    
-    if is_simplified then
-        if not groups_simp then
-            groups_simp, char_to_gids_simp = load_phonetic_groups(true)
-        end
-        groups = groups_simp
-        char_to_gids = char_to_gids_simp
-    else
-        if not groups_trad then
-            groups_trad, char_to_gids_trad = load_phonetic_groups(false)
-        end
-        groups = groups_trad
-        char_to_gids = char_to_gids_trad
-    end
+    local groups, char_to_gids = load_phonetic_groups(is_simplified)
     
     local gid_str = char_to_gids[char]
     if not gid_str then
@@ -120,40 +67,7 @@ end
 
 -- 載入編碼資料（優化：使用字串存儲）
 local function load_code_data()
-    local data = {}
-    
-    local function process_file(filepath)
-        local file = io.open(filepath, "r")
-        if not file then
-            return false
-        end
-        
-        for line in file:lines() do
-            local char, codes_str = line:match("^([^\t]+)\t~(.+)$")
-            if char and codes_str then
-                -- 直接存儲原始字串，不預先解析
-                if not data[char] then
-                    data[char] = codes_str
-                else
-                    data[char] = data[char] .. codes_str
-                end
-            end
-        end
-        file:close()
-        return true
-    end
-    
-    local user_dir = rime_api.get_user_data_dir()
-    local shared_dir = rime_api.get_shared_data_dir()
-    
-    if not process_file(user_dir .. "/opencc/liu_w2c.txt") then
-        process_file(shared_dir .. "/opencc/liu_w2c.txt")
-    end
-    if not process_file(user_dir .. "/opencc/liu_w2cExt.txt") then
-        process_file(shared_dir .. "/opencc/liu_w2cExt.txt")
-    end
-    
-    return data
+    return liu_data.get_w2c_data()
 end
 
 -- 解析編碼字串（即時解析）
@@ -196,6 +110,7 @@ local function get_opencc_s2t()
 end
 
 local function get_char_codes(char, is_simplified)
+    local code_data = liu_data.get_w2c_data() -- Always get fresh data from liu_data
     if not code_data then
         return nil
     end
@@ -262,13 +177,7 @@ local function format_code_comment(base_comment, codes, liu_w2c_enabled)
     return table.concat(parts)
 end
 
--- 確保編碼資料已載入
-local function ensure_code_data()
-    if not code_data then
-        code_data = load_code_data()
-    end
-    return code_data
-end
+-- (removed ensure_code_data)
 
 -- ============ 運行時狀態 ============
 local selected_char = nil
@@ -282,12 +191,9 @@ local function clear_all_cache()
     is_showing_phonetics = false
     original_input = ""
     cached_candidates = nil
-    -- 釋放大型資料
-    groups_trad = nil
-    groups_simp = nil
-    char_to_gids_trad = nil
-    char_to_gids_simp = nil
-    code_data = nil
+    cached_candidates = nil
+    -- 釋放大型資料由 liu_gc_processor 透過 liu_data 統一管理
+    -- 這裡只清除本地狀態
     -- opencc_s2t 保留，因為其他模組也可能用到
 end
 
@@ -383,7 +289,7 @@ local function liu_phonetic_suffix_translator(input, seg, env)
         return
     end
     
-    ensure_code_data()
+    -- ensure_code_data() removed
     
     local phonetics = get_phonetics_for_char(selected_char, is_simplified)
     

@@ -5,40 +5,12 @@
 -- 注意：w2c 中的 VRSF 編碼已經過濾，只包含「真正能用的」
 
 -- 全局緩存
-local code_dict_cache = nil
+-- 全局緩存
+local liu_data = require("liu_data")
 
--- 載入編碼字典（字 -> 編碼列表）
+-- 載入編碼字典（從共用資料中心獲取）
 local function load_code_dict()
-    if code_dict_cache then
-        return code_dict_cache
-    end
-    
-    local dict = {}
-    local dict_file = io.open(rime_api.get_user_data_dir() .. "/opencc/liu_w2c.txt", "r")
-    if not dict_file then
-        dict_file = io.open(rime_api.get_shared_data_dir() .. "/opencc/liu_w2c.txt", "r")
-    end
-    
-    if dict_file then
-        local content = dict_file:read("*all")
-        dict_file:close()
-        
-        for line in content:gmatch("[^\r\n]+") do
-            local char, code_str = line:match("^([^\t]+)\t~(.+)$")
-            if char and code_str then
-                local codes = {}
-                local temp_str = code_str:gsub("\\⟩", "\x01")
-                for code in temp_str:gmatch("⟨([^⟩]+)⟩") do
-                    code = code:gsub("\x01", "⟩")
-                    codes[#codes + 1] = code
-                end
-                dict[char] = codes
-            end
-        end
-    end
-    
-    code_dict_cache = dict
-    return dict
+    return liu_data.get_w2c_data()
 end
 
 -- VRSF 對應表
@@ -102,7 +74,10 @@ local function filter(input, env)
                 -- 檢查是否有與當前輸入匹配的 VRSF 輔碼
                 local hint_suffix = nil
                 
-                for _, code in ipairs(codes) do
+                -- 解析原始編碼字串 "⟨AAA^V⟩⟨BBB^R⟩"
+                local temp_str = codes:gsub("\\⟩", "\x01")
+                for raw_code in temp_str:gmatch("⟨([^⟩]+)⟩") do
+                    local code = raw_code:gsub("\x01", "⟩")
                     -- 解析編碼和輔碼，如 "AAA^V" → base="AAA", suffix="V"
                     local base, suffix = code:match("^(.+)%^([VRSF])$")
                     if base and suffix and base == input_upper then
