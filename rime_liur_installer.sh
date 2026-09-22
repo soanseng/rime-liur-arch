@@ -210,6 +210,7 @@ echo "[ Step 1: 下載蝦米輸入方案檔案 ]"
 mkdir -p "$RIME_FOLDER"
 mkdir -p "$RIME_FOLDER/lua"
 mkdir -p "$RIME_FOLDER/lua/lunar_calendar"
+mkdir -p "$RIME_FOLDER/lua/data"
 mkdir -p "$RIME_FOLDER/opencc"
 mkdir -p "$RIME_FOLDER/configs"
 
@@ -220,7 +221,7 @@ CUSTOM_FILES=("openxiami_CustomWord.dict.yaml" "default.custom.yaml" "squirrel.c
 
 # 下載主要檔案
 for file in "${ROOT_FILES[@]}"; do
-    ((CURRENT++))
+    CURRENT=$((CURRENT + 1))
     # 檢查是否為自定義設定檔且選擇保留
     if [[ " ${CUSTOM_FILES[*]} " =~ " ${file} " ]] && [ "$KEEP_CUSTOM_FILES" = true ] && [ -f "$RIME_FOLDER/$file" ]; then
         show_progress $CURRENT $TOTAL_FILES "$file [保留]"
@@ -230,17 +231,19 @@ for file in "${ROOT_FILES[@]}"; do
     fi
 done
 
-# 下載 Lua 檔案
+# 下載 Lua 檔案（保留 lua/ 子目錄，例如 lua/data/emoji.txt，不可壓成 lua/emoji.txt）
 for file in "${LUA_FILES[@]}"; do
-    ((CURRENT++))
-    filename=$(basename "$file")
-    show_progress $CURRENT $TOTAL_FILES "$filename"
-    curl -fsSL "${GITHUB_RAW}/${file}" -o "$RIME_FOLDER/lua/$filename"
+    CURRENT=$((CURRENT + 1))
+    rel="${file#lua/}"
+    dest_dir="$RIME_FOLDER/lua/$(dirname "$rel")"
+    mkdir -p "$dest_dir"
+    show_progress $CURRENT $TOTAL_FILES "$file"
+    curl -fsSL "${GITHUB_RAW}/${file}" -o "$RIME_FOLDER/lua/$rel"
 done
 
 # 下載 Lua lunar_calendar 檔案
 for file in "${LUA_LUNAR_FILES[@]}"; do
-    ((CURRENT++))
+    CURRENT=$((CURRENT + 1))
     filename=$(basename "$file")
     show_progress $CURRENT $TOTAL_FILES "$filename"
     curl -fsSL "${GITHUB_RAW}/${file}" -o "$RIME_FOLDER/lua/lunar_calendar/$filename"
@@ -248,7 +251,7 @@ done
 
 # 下載 OpenCC 檔案
 for file in "${OPENCC_FILES[@]}"; do
-    ((CURRENT++))
+    CURRENT=$((CURRENT + 1))
     filename=$(basename "$file")
     show_progress $CURRENT $TOTAL_FILES "$filename"
     curl -fsSL "${GITHUB_RAW}/${file}" -o "$RIME_FOLDER/opencc/$filename"
@@ -256,7 +259,7 @@ done
 
 # 下載 Configs 檔案
 for file in "${CONFIGS_FILES[@]}"; do
-    ((CURRENT++))
+    CURRENT=$((CURRENT + 1))
     filename=$(basename "$file")
     show_progress $CURRENT $TOTAL_FILES "$filename"
     curl -fsSL "${GITHUB_RAW}/${file}" -o "$RIME_FOLDER/configs/$filename"
@@ -290,7 +293,7 @@ FONT_TOTAL=${#FONT_FILES[@]}
 FONT_CURRENT=0
 
 for file in "${FONT_FILES[@]}"; do
-    ((FONT_CURRENT++))
+    FONT_CURRENT=$((FONT_CURRENT + 1))
     filename=$(basename "$file")
     if [ -f "$FONT_FOLDER/$filename" ]; then
         show_progress $FONT_CURRENT $FONT_TOTAL "$filename [skip]"
